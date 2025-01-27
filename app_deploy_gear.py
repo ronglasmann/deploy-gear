@@ -50,7 +50,8 @@ def docker_run(app_name, app_start_cmd, docker_image_name=None, net_name=None,
 
     cmd = f"{sudo()} docker run --name {app_name} --env APP_NAME={app_name} "
     cmd += f"--env RUNTIME_ENV={environment()} --env PYTHONUNBUFFERED=1 "
-    cmd += f"--network {net_name} "
+    if net_name is not None:
+        cmd += f"--network {net_name} "
 
     # expose ports
     if port_mappings and len(port_mappings) > 0:
