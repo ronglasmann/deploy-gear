@@ -1,4 +1,5 @@
 import os
+import socket
 import sys
 import traceback
 import getopt
@@ -126,10 +127,17 @@ def docker_prune():
     os.system(f"{sudo()} docker system prune -f")
 
 
+# --------------------------------------------------------------------------- #
+# docker network create
 def docker_network_create(net_name=None, driver=DEFAULT_NET_DRIVER):
-    if driver == NET_DRIVER_BRIDGE and net_name is None:
-        raise Exception(f"Unspecified net_name when creating {driver} network")
-    os.system(f"{sudo()} docker network create --driver {driver} {net_name}")
+    if driver == NET_DRIVER_BRIDGE:
+        if net_name is None:
+            raise Exception(f"Unspecified net_name when creating {driver} network")
+        cmd = f"{sudo()} docker network inspect {net_name} >/dev/null 2>&1 " \
+              f"|| {sudo()} docker network create --driver {driver} {net_name}"
+    else:
+        cmd = f"{sudo()} docker network create --driver {driver} "
+    os.system(cmd)
 
 
 def docker_network_destroy(net_name=None):
@@ -145,7 +153,7 @@ def docker_service_start():
 def log_group(base_log_group=None):
     if base_log_group is None:
         raise Exception(f"Unspecified base_log_group")
-    return f"{base_log_group}/{environment()}"
+    return f"{base_log_group}/{environment()}/{socket.gethostname()}"
 
 
 # def image_name(base_image_name=IMAGE_NAME_BASE):
